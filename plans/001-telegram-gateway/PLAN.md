@@ -117,8 +117,8 @@ This crosses the gateway↔plugin boundary.
 
 ### 4. Render
 
-- Blueprint creates `luna-tg-gateway` and `luna-tg-db`, plan `starter`, region
-  `oregon`, one instance.
+- Blueprint creates one `starter` `luna-tg-gateway` instance and a
+  `basic-256mb` `luna-tg-db` in `oregon`.
 - Required dashboard secrets:
   `TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBHOOK_SECRET`, `TG_SHARED_SECRET`,
   `GATEWAY_ADMIN_KEY`, and `LUNA_INBOUND_URL`.
