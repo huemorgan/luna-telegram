@@ -1,0 +1,3 @@
+[submodule "plugin-telegram"]
+	path = plugin-telegram
+	url = https://github.com/huemorgan/plugin-telegram.git
