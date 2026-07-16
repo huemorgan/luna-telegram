@@ -1,0 +1,33 @@
+# Single-account Telegram gateway v0.1. Multi-account provisioning belongs to
+# luna-service and is intentionally not represented in this blueprint.
+services:
+  - type: web
+    name: luna-tg-gateway
+    runtime: docker
+    dockerfilePath: ./gateway/Dockerfile
+    dockerContext: ./gateway
+    plan: starter
+    region: oregon
+    healthCheckPath: /health
+    numInstances: 1
+    envVars:
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: TELEGRAM_WEBHOOK_SECRET
+        sync: false
+      - key: TG_SHARED_SECRET
+        sync: false
+      - key: GATEWAY_ADMIN_KEY
+        sync: false
+      - key: LUNA_INBOUND_URL
+        sync: false
+      - key: DATABASE_URL
+        fromDatabase:
+          name: luna-tg-db
+          property: connectionString
+
+databases:
+  - name: luna-tg-db
+    plan: starter
+    region: oregon
+    postgresMajorVersion: "16"
