@@ -1,7 +1,7 @@
 {
   "name": "luna-tg-gateway",
-  "version": "0.1.0",
-  "description": "Durable Telegram Bot API gateway for Luna",
+  "version": "0.2.0",
+  "description": "Durable multi-account Telegram Bot API gateway for Luna",
   "type": "module",
   "license": "MIT",
   "engines": {

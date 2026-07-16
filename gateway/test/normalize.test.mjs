@@ -36,6 +36,11 @@ test('normalizes a direct text message', () => {
   });
 });
 
+test('normalizes the resolved hosted account into the envelope', () => {
+  const out = normalizeUpdate({ update_id: 105, message: baseMessage }, BOT, 'agent-a');
+  assert.equal(out.account, 'agent-a');
+});
+
 test('detects group mentions, bot commands, and replies to the bot', () => {
   const text = '@LunaBot /ask@LunaBot status';
   const message = {

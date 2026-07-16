@@ -4,7 +4,11 @@
 
 - `render.yaml` — Oregon Render web service and Postgres blueprint.
 - `plans/001-telegram-gateway/PLAN.md` — delivery plan and acceptance criteria.
+- `plans/002-telegram-multi-account/PLAN.md` — encrypted hosted account
+  provisioning and routing.
 - `tests/001-telegram-gateway/api-scenarios.md` — manual integration scenarios.
+- `tests/002-telegram-multi-account/api-scenarios.md` — tenant isolation,
+  lifecycle, rotation, and fleet-operation scenarios.
 - `vision/vision.md` — product and platform boundaries.
 - `vision/architecture.md` — topology, sequences, persistence, and failures.
 - `vision/contract.md` — exact gateway↔plugin wire contract.
@@ -13,6 +17,9 @@
 
 - `gateway/src/index.js` — bootstrap schema, read bot/webhook identity, start and
   stop HTTP server.
+- `gateway/src/accounts.js` — account ID validation, safe metadata, encrypted
+  credential lifecycle, webhook provisioning, rotation, and disable.
+- `gateway/src/crypto.js` — AES-256-GCM key parsing/encrypt/decrypt helpers.
 - `gateway/src/config.js` — required and optional environment parsing.
 - `gateway/src/app.js` — Express routes, edge/admin/HMAC authentication, health,
   stats, webhook capture ordering, and outbound dispatch.
@@ -41,6 +48,11 @@
 - `gateway/test/app.test.mjs` — edge/admin/HMAC auth, capture-before-forward,
   idempotency, operations endpoints, and outbound route mapping.
 - `gateway/test/db.test.mjs` — schema guarantees and transaction ordering.
+- `gateway/test/accounts.test.mjs` — encryption, provisioning, idempotency,
+  redaction, rotation, duplicate-bot rejection, and disconnect.
+- `gateway/test/postgres.integration.test.mjs` — optional
+  `TEST_DATABASE_URL` fresh schema, outbound stats, and retained-history
+  migration coverage.
 
 ## Separate plugin repository
 

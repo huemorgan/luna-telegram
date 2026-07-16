@@ -23,6 +23,7 @@ export async function forwardInbound(
         method: 'POST',
         headers: {
           'content-type': 'application/json',
+          'x-tg-account': envelope.account,
           'x-tg-timestamp': auth.timestamp,
           'x-tg-signature': auth.signature,
         },

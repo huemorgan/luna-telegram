@@ -147,10 +147,24 @@ test('Telegram client exposes safe Bot API errors', async () => {
   });
 });
 
+test('Telegram client sanitizes network errors that could expose token URLs', async () => {
+  const client = new TelegramClient({
+    token: 'SUPER-SECRET-TOKEN',
+    fetchImpl: async () => {
+      throw new Error('request failed at https://api.telegram.org/botSUPER-SECRET-TOKEN/getMe');
+    },
+  });
+  await assert.rejects(() => client.getMe(), (error) => {
+    assert.equal(error.message, 'Telegram API unavailable');
+    assert.doesNotMatch(error.message, /SUPER-SECRET-TOKEN/);
+    return true;
+  });
+});
+
 test('signed forwarding uses exact body bytes and bounded retry', async () => {
   const seen = [];
   const result = await forwardInbound(
-    { tg_update_id: 10, body: 'hi' },
+    { account: 'agent-a', tg_update_id: 10, body: 'hi' },
     {
       url: 'https://luna.invalid/inbound',
       secret: 'shared',
@@ -164,6 +178,7 @@ test('signed forwarding uses exact body bytes and bounded retry', async () => {
   );
   assert.deepEqual(result, { ok: true, attempts: 2 });
   assert.equal(Buffer.isBuffer(seen[0].body), true);
+  assert.equal(seen[0].headers['x-tg-account'], 'agent-a');
   assert.equal(
     verify(
       'shared',

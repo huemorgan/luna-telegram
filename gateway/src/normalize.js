@@ -127,12 +127,12 @@ function reactionValue(reaction) {
   return { ...reaction };
 }
 
-function normalizeReaction(update, reaction) {
+function normalizeReaction(update, reaction, account) {
   const sender = reaction.user ?? reaction.actor_chat;
   const fresh = (reaction.new_reaction ?? []).map(reactionValue);
   const old = (reaction.old_reaction ?? []).map(reactionValue);
   return {
-    account: 'default',
+    account,
     event_type: 'reaction',
     chat_id: String(reaction.chat.id),
     chat_kind: chatKind(reaction.chat.type),
@@ -166,9 +166,9 @@ export function updateType(update) {
   ].find((key) => update[key] != null) ?? 'unknown';
 }
 
-export function normalizeUpdate(update, bot = {}) {
+export function normalizeUpdate(update, bot = {}, account = 'default') {
   if (!Number.isSafeInteger(update?.update_id)) return null;
-  if (update.message_reaction) return normalizeReaction(update, update.message_reaction);
+  if (update.message_reaction) return normalizeReaction(update, update.message_reaction, account);
 
   const type = updateType(update);
   const message = update[type];
@@ -180,7 +180,7 @@ export function normalizeUpdate(update, bot = {}) {
   const sender = message.from ?? message.sender_chat;
   const content = messageContent(message);
   return {
-    account: 'default',
+    account,
     event_type: type.startsWith('edited_') ? 'edit' : 'message',
     chat_id: String(message.chat.id),
     chat_kind: chatKind(message.chat.type),

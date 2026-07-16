@@ -1,4 +1,5 @@
 import { createApp } from './app.js';
+import { AccountManager } from './accounts.js';
 import { loadConfig } from './config.js';
 import { createPool, TelegramStore } from './db.js';
 import { TelegramClient } from './telegram.js';
@@ -6,31 +7,40 @@ import { TelegramClient } from './telegram.js';
 const config = loadConfig();
 const pool = createPool(config.databaseUrl);
 const store = new TelegramStore(pool);
-const telegram = new TelegramClient({
-  token: config.botToken,
+const telegramFactory = (token) => new TelegramClient({
+  token,
   apiBase: config.telegramApiBase,
   timeoutMs: config.telegramTimeoutMs,
 });
 
 await store.init();
+const accountManager = new AccountManager({
+  store,
+  encryptionKey: config.encryptionKey,
+  publicUrl: config.publicUrl,
+  telegramFactory,
+});
 
-const [botResult, webhookResult] = await Promise.allSettled([
-  telegram.getMe(),
-  telegram.getWebhookInfo(),
-]);
-const bot = botResult.status === 'fulfilled' ? botResult.value : null;
-const webhook = webhookResult.status === 'fulfilled' ? webhookResult.value : null;
-if (botResult.status === 'rejected') {
-  console.error('[telegram] getMe failed:', botResult.reason.message);
+if (config.legacy) {
+  const client = telegramFactory(config.legacy.botToken);
+  try {
+    const [bot, webhook] = await Promise.all([
+      client.getMe(),
+      client.getWebhookInfo(),
+    ]);
+    await accountManager.seedLegacy({
+      ...config.legacy,
+      bot,
+      webhook,
+    });
+  } catch (error) {
+    console.error('[telegram] legacy default initialization failed:', error.message);
+  }
 }
-if (webhookResult.status === 'rejected') {
-  console.error('[telegram] getWebhookInfo failed:', webhookResult.reason.message);
-}
-await store.updateTelegramState(bot, webhook);
 
-const app = createApp({ config, store, telegram, initialBot: bot });
+const app = createApp({ config, store, accountManager });
 const server = app.listen(config.port, () => {
-  console.log(`[gateway] listening on :${config.port} as @${bot?.username ?? 'unknown'}`);
+  console.log(`[gateway] listening on :${config.port}`);
 });
 
 async function shutdown(signal) {

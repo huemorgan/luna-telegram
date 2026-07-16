@@ -17,12 +17,19 @@ export class TelegramClient {
   }
 
   async call(method, payload = {}) {
-    const response = await this.fetchImpl(`${this.baseUrl}/${method}`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(payload),
-      signal: AbortSignal.timeout(this.timeoutMs),
-    });
+    let response;
+    try {
+      response = await this.fetchImpl(`${this.baseUrl}/${method}`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(payload),
+        signal: AbortSignal.timeout(this.timeoutMs),
+      });
+    } catch {
+      throw new TelegramApiError(method, 502, {
+        description: 'Telegram API unavailable',
+      });
+    }
 
     let data;
     try {
@@ -46,6 +53,10 @@ export class TelegramClient {
 
   setWebhook(payload) {
     return this.call('setWebhook', payload);
+  }
+
+  deleteWebhook(payload = {}) {
+    return this.call('deleteWebhook', payload);
   }
 }
 
